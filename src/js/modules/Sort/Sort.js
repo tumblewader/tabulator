@@ -233,7 +233,7 @@ export default class Sort extends Module{
 	
 	refreshSort(){
 		if(this.table.options.sortMode === "remote"){
-			this.reloadData(null, false, false);
+			this.reloadData(null, false, false, true);
 		}else{
 			this.refreshData(true);
 		}

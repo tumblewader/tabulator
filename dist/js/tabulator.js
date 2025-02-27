@@ -82,9 +82,10 @@
 		/////////////// DataLoad /////////////////
 		//////////////////////////////////////////
 
-		reloadData(data, silent, columnsChanged){
-			return this.table.dataLoader.load(data, undefined, undefined, undefined, silent, columnsChanged);
+		reloadData(data, silent, columnsChanged, replace = false){
+			return this.table.dataLoader.load(data, undefined, undefined, replace, silent, columnsChanged);
 		}
+			
 
 		//////////////////////////////////////////
 		///////////// Localization ///////////////
@@ -8460,6 +8461,7 @@
 			//clear DOM
 			while(element.firstChild) element.removeChild(element.firstChild);
 			element.classList.remove("tabulator");
+			element.removeAttribute("tabulator-layout");
 
 			this.externalEvents.dispatch("tableDestroyed");
 		}
@@ -16236,7 +16238,7 @@
 		refreshFilter(){
 			if(this.tableInitialized){
 				if(this.table.options.filterMode === "remote"){
-					this.reloadData(null, false, false);
+					this.reloadData(null, false, false, true);
 				}else {
 					this.refreshData(true);
 				}
@@ -26063,8 +26065,8 @@
 			this.right = 0;
 			
 			this.table = table;
-			this.start = {row:0, col:0};
-			this.end = {row:0, col:0};
+			this.start = {row:undefined, col:undefined};
+			this.end = {row:undefined, col:undefined};
 
 			if(this.rangeManager.rowHeader){
 				this.left = 1;
@@ -26995,13 +26997,15 @@
 		///////////////////////////////////
 		
 		keyNavigate(dir, e){
-			if(this.navigate(false, false, dir));
-			e.preventDefault();
+			if(this.navigate(false, false, dir)){
+				e.preventDefault();
+			}
 		}
 		
 		keyNavigateRange(e, dir, jump, expand){
-			if(this.navigate(jump, expand, dir));
-			e.preventDefault();
+			if(this.navigate(jump, expand, dir)){
+				e.preventDefault();
+			}
 		}
 		
 		navigate(jump, expand, dir) {
@@ -27119,9 +27123,8 @@
 				}
 
 				this.layoutElement();
-				
-				return true;
 			}
+			return true;
 		}
 		
 		rangeRemoved(removed){
@@ -28068,7 +28071,7 @@
 		
 		refreshSort(){
 			if(this.table.options.sortMode === "remote"){
-				this.reloadData(null, false, false);
+				this.reloadData(null, false, false, true);
 			}else {
 				this.refreshData(true);
 			}
