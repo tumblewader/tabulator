@@ -1473,18 +1473,6 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   }
 }
 
-.tabulator.thead-dark .tabulator-header {
-  border-color: #dee2e6;
-  background-color: #fff;
-  color: #212529;
-}
-
-.tabulator.thead-dark .tabulator-header .tabulator-col {
-  border-color: #dee2e6;
-  background-color: #fff;
-  color: #212529;
-}
-
 .tabulator.table {
   background-color: #fff;
 }
@@ -1601,6 +1589,130 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
 
 .tabulator.table-sm .tabulator-col-resize-handle {
   padding: 0;
+}
+
+.tabulator.thead-dark .tabulator-header {
+  border-color: #4d5154;
+  background-color: #212529;
+  color: #fff;
+}
+
+.tabulator.thead-dark .tabulator-header .tabulator-col {
+  border-color: #4d5154;
+  background-color: #212529;
+  color: #fff;
+}
+
+.tabulator.table-striped:not(.table-dark) .tabulator-row.tabulator-row-even,
+  html:not([data-bs-theme="dark"]) .tabulator.table-striped .tabulator-row.tabulator-row-even {
+  background-color: #e9ecef;
+}
+
+.tabulator.table-striped:not(.table-dark) .tabulator-row.tabulator-row-even.tabulator-selected,
+    html:not([data-bs-theme="dark"]) .tabulator.table-striped .tabulator-row.tabulator-row-even.tabulator-selected {
+  background-color: #9ABCEA;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tabulator.table-striped:not(.table-dark) .tabulator-row.tabulator-row-even.tabulator-selectable:hover,
+      html:not([data-bs-theme="dark"]) .tabulator.table-striped .tabulator-row.tabulator-row-even.tabulator-selectable:hover {
+    background-color: #ced4da;
+    cursor: pointer;
+  }
+  .tabulator.table-striped:not(.table-dark) .tabulator-row.tabulator-row-even.tabulator-selected:hover,
+      html:not([data-bs-theme="dark"]) .tabulator.table-striped .tabulator-row.tabulator-row-even.tabulator-selected:hover {
+    background-color: #769BCC;
+    cursor: pointer;
+  }
+}
+
+.tabulator.table-striped.table-dark .tabulator-row:nth-child(even),
+  html[data-bs-theme="dark"] .tabulator.table-striped .tabulator-row:nth-child(even) {
+  background-color: #2c3034 !important;
+}
+
+.tabulator.table-striped.table-dark .tabulator-row:nth-child(even) .tabulator-cell,
+    html[data-bs-theme="dark"] .tabulator.table-striped .tabulator-row:nth-child(even) .tabulator-cell {
+  background-color: inherit;
+}
+
+.tabulator.table-dark,
+  html[data-bs-theme="dark"] .tabulator {
+  background-color: #212529;
+}
+
+.tabulator.table-dark:not(.thead-light) .tabulator-header,
+    html[data-bs-theme="dark"] .tabulator:not(.thead-light) .tabulator-header {
+  border-color: #4d5154;
+  background-color: #212529;
+  color: #fff;
+}
+
+.tabulator.table-dark:not(.thead-light) .tabulator-header .tabulator-col,
+      html[data-bs-theme="dark"] .tabulator:not(.thead-light) .tabulator-header .tabulator-col {
+  border-color: #4d5154;
+  background-color: #212529;
+  color: #fff;
+}
+
+.tabulator.table-dark .tabulator-tableholder,
+    html[data-bs-theme="dark"] .tabulator .tabulator-tableholder {
+  color: #fff;
+}
+
+.tabulator.table-dark .tabulator-cell,
+    html[data-bs-theme="dark"] .tabulator .tabulator-cell {
+  color: #fff;
+  background-color: #212529;
+  border-color: #4d5154;
+}
+
+.tabulator.table-dark .tabulator-row,
+    html[data-bs-theme="dark"] .tabulator .tabulator-row {
+  border-color: #4d5154;
+  background-color: #212529;
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tabulator.table-dark .tabulator-row:hover,
+        html[data-bs-theme="dark"] .tabulator .tabulator-row:hover {
+    background-color: #4d5154;
+  }
+  .tabulator.table-dark .tabulator-row:hover .tabulator-cell,
+          html[data-bs-theme="dark"] .tabulator .tabulator-row:hover .tabulator-cell {
+    background-color: #323539;
+  }
+}
+
+.tabulator.table-dark .tabulator-row.tabulator-selected,
+      html[data-bs-theme="dark"] .tabulator .tabulator-row.tabulator-selected {
+  background-color: #373b3e;
+}
+
+.tabulator.table-dark .tabulator-footer,
+    html[data-bs-theme="dark"] .tabulator .tabulator-footer {
+  border-color: #4d5154 !important;
+  color: #212529 !important;
+}
+
+.tabulator.table-dark .tabulator-footer .tabulator-calcs-holder,
+      html[data-bs-theme="dark"] .tabulator .tabulator-footer .tabulator-calcs-holder {
+  border-color: #4d5154 !important;
+  background: #212529 !important;
+}
+
+.tabulator.table-dark .tabulator-footer .tabulator-calcs-holder .tabulator-row,
+        html[data-bs-theme="dark"] .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+  border-color: #4d5154 !important;
+  background-color: #212529 !important;
+  color: #fff !important;
+}
+
+.tabulator.table-dark input,
+    html[data-bs-theme="dark"] .tabulator input {
+  color: #fff !important;
+  background-color: #6c757d !important;
 }
 
 .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.table-primary {

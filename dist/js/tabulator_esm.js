@@ -6413,7 +6413,7 @@ let Edit$1 = class Edit{
 		}
 		
 		this._bindInputEvents(input);
-		
+
 		return input;
 	}
 	
@@ -6523,7 +6523,7 @@ let Edit$1 = class Edit{
 			if(this.popup){
 				this.popup.hide();
 			}else {
-				this._resolveValue(true);
+				this._cancel(true);
 			}
 		}
 	}
@@ -7091,7 +7091,26 @@ let Edit$1 = class Edit{
 		
 		if(!this.displayItems.length){
 			this._addPlaceholder(this.params.placeholderEmpty);
-		}  
+		}else {
+			// Add done and cancel buttons side by side with cancel on the left side
+			var buttonContainer = document.createElement("div");
+			buttonContainer.style.display = "flex";
+			buttonContainer.style.justifyContent = "space-between";
+
+			var cancelButton = document.createElement("button");
+			cancelButton.innerHTML = this.params.cancelButtonTitle ?? "Cancel";
+			cancelButton.style.flex = "1";
+			cancelButton.addEventListener("click", this._cancel.bind(this));
+			buttonContainer.appendChild(cancelButton);
+
+			var doneButton = document.createElement("button");
+			doneButton.innerHTML = this.params.successButtonTitle ?? "Done";
+			doneButton.style.flex = "1";
+			doneButton.addEventListener("click", this._resolveValue.bind(this, true));
+			buttonContainer.appendChild(doneButton);
+
+			this.listEl.appendChild(buttonContainer);
+		}
 	}
 	
 	_buildItem(item){
@@ -7213,6 +7232,7 @@ let Edit$1 = class Edit{
 	//////////////////////////////////////
 	
 	_cancel(){
+		this.input.value = this.initialValues ? this.initialValues.join(",") : "";
 		this.popup.hide(true);
 		this.actions.cancel();
 	}
@@ -7234,35 +7254,20 @@ let Edit$1 = class Edit{
 		var index;
 		
 		this.typing = false;
-		
-		if(this.params.multiselect){
-			index = this.currentItems.indexOf(item);
-			
-			if(index > -1){
-				this.currentItems.splice(index, 1);
-				item.selected = false;
-			}else {
-				this.currentItems.push(item);
-				item.selected = true;
-			}
-			
-			this.input.value = this.currentItems.map(item => item.label).join(",");
-			
-			this._styleItem(item);
-			
-		}else {
-			this.currentItems = [item];
-			item.selected = true;
-			
-			this.input.value = item.label;
-			
-			this._styleItem(item);
-			
-			if(!silent){
-				this._resolveValue();
-			}
+		index = this.currentItems.indexOf(item);
+		const isSelected = index > -1;
+		if (this.params.multiselect) {
+			isSelected ? this.currentItems.splice(index, 1) : this.currentItems.push(item);
+		} else {
+			this.currentItems.forEach(currentItem => {
+				currentItem.selected = false;
+				this._styleItem(currentItem);
+			});
+			this.currentItems = isSelected ? [] : [item];	
 		}
-		
+		item.selected = !isSelected;
+		this.input.value = this.currentItems.map(item => item.label).join(",");
+		this._styleItem(item);
 		this._focusItem(item);
 	}
 	
@@ -20825,7 +20830,7 @@ class SelectRange extends Module {
 			}
 		}
 		
-		this.layoutElement();
+		this.layoutElement(true);
 	}
 	
 	findJumpRow(column, rows, reverse, emptyStart, emptySide){
@@ -20967,11 +20972,11 @@ class SelectRange extends Module {
 		}
 		
 		if (event.shiftKey) {
-			this.activeRange.setBounds(false, element);
+			this.activeRange.setBounds(false, element, true);
 		} else if (event.ctrlKey) {
-			this.addRange().setBounds(element);
+			this.addRange().setBounds(element, undefined, true);
 		} else {
-			this.resetRanges().setBounds(element);
+			this.resetRanges().setBounds(element, undefined, true);
 		}
 	}
 	
@@ -26793,10 +26798,14 @@ class RowManager extends CoreFeature{
 			//check if the table has changed size when dealing with variable height tables
 			if(!this.fixedHeight && initialHeight != this.element.clientHeight){
 				resized = true;
-				if(this.subscribed("table-resize")){
-					this.dispatch("table-resize");
-				}else {
-					this.redraw();
+				if(!this.redrawing){ // prevent recursive redraws		
+					this.redrawing = true;
+					if(this.subscribed("table-resize")){
+						this.dispatch("table-resize");
+					}else {
+						this.redraw();
+					}
+					this.redrawing = false;
 				}
 			}
 			
