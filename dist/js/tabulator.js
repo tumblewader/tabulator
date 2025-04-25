@@ -13409,7 +13409,7 @@
 			if(!this.displayItems.length){
 				this._addPlaceholder(this.params.placeholderEmpty);
 			}else {
-				// Add done and cancel buttons side by side with cancel on the left side
+				// Update the button container to use the CSS classes defined in the SCSS file
 				var buttonContainer = document.createElement("div");
 				buttonContainer.style.display = "flex";
 				buttonContainer.style.justifyContent = "space-between";
@@ -13417,12 +13417,14 @@
 				var cancelButton = document.createElement("button");
 				cancelButton.innerHTML = this.params.cancelButtonTitle ?? "Cancel";
 				cancelButton.style.flex = "1";
+				cancelButton.classList.add("tabulator-edit-list-cancel"); // Add class for cancel button styling
 				cancelButton.addEventListener("click", this._cancel.bind(this));
 				buttonContainer.appendChild(cancelButton);
 
 				var doneButton = document.createElement("button");
 				doneButton.innerHTML = this.params.successButtonTitle ?? "Done";
 				doneButton.style.flex = "1";
+				doneButton.classList.add("tabulator-edit-list-done"); // Add class for done button styling
 				doneButton.addEventListener("click", this._resolveValue.bind(this, true));
 				buttonContainer.appendChild(doneButton);
 
@@ -13549,7 +13551,10 @@
 		//////////////////////////////////////
 		
 		_cancel(){
-			this.input.value = this.initialValues ? this.initialValues.join(",") : "";
+			this.input.value = Array.isArray(this.initialValues) ? this.initialValues[0] : this.initialValues;
+			if(this.isFilter){
+				this.currentItems = [];
+			}
 			this.popup.hide(true);
 			this.actions.cancel();
 		}

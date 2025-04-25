@@ -1,0 +1,16 @@
+
+services:
+  tabulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./examples:/usr/src/app/examples
+      - ./dist:/usr/src/app/dist
+      - ./src:/usr/src/app/src
+    ports:
+      - "8081:8081"
+    command: >
+      sh -c "npm run dev & npm run dev:css & npx http-server -p 8081 -c-1 /usr/src/app/"
+    environment:
+      - NODE_ENV=development
