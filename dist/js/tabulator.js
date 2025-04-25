@@ -12586,6 +12586,7 @@
 			
 			this.input = this._createInputElement();
 			this.listEl = this._createListElement();
+			this.listContainerEl = this._createListContainerElement();
 			
 			this.initialValues = null; 
 			
@@ -12673,26 +12674,35 @@
 		
 		_createListElement(){
 			var listEl = document.createElement("div");
-			listEl.classList.add("tabulator-edit-list");
 			
 			listEl.addEventListener("mousedown", this._preventBlur.bind(this));
 			listEl.addEventListener("keydown", this._inputKeyDown.bind(this));
 			
 			return listEl;
 		}
+		_createListContainerElement() {
+			var listContainerEl = document.createElement("div");
+
+			listContainerEl.classList.add("tabulator-edit-list");
+
+			listContainerEl.addEventListener("mousedown", this._preventBlur.bind(this));
+			listContainerEl.addEventListener("keydown", this._inputKeyDown.bind(this));
+			
+			return listContainerEl;
+		}
 		
 		_setListWidth(){
 			var element = this.isFilter ? this.input : this.cell.getElement();
 			
-			this.listEl.style.minWidth = element.offsetWidth + "px";
+			this.listContainerEl.style.minWidth = element.offsetWidth + "px";
 			
 			if(this.params.maxWidth){
 				if(this.params.maxWidth === true){
-					this.listEl.style.maxWidth = element.offsetWidth + "px";
+					this.listContainerEl.style.maxWidth = element.offsetWidth + "px";
 				}else if(typeof this.params.maxWidth === "number"){
-					this.listEl.style.maxWidth = this.params.maxWidth + "px";
+					this.listContainerEl.style.maxWidth = this.params.maxWidth + "px";
 				}else {
-					this.listEl.style.maxWidth = this.params.maxWidth;
+					this.listContainerEl.style.maxWidth = this.params.maxWidth;
 				}
 			}
 			
@@ -12931,7 +12941,7 @@
 				this._resolveValue(true);
 			}else {
 				if(this.focusedItem){
-					this._chooseItem(this.focusedItem, true);
+					this._chooseItem(this.focusedItem);
 				}
 			}
 		}
@@ -13115,7 +13125,7 @@
 			var placeholder = document.createElement("div");
 			
 			if(typeof contents === "function"){
-				contents = contents(this.cell.getComponent(), this.listEl);
+				contents = contents(this.cell.getComponent(), this.listContainerEl);
 			}
 			
 			if(contents){
@@ -13128,7 +13138,7 @@
 					placeholder.innerHTML = contents;
 				}
 				
-				this.listEl.appendChild(placeholder);
+				this.listContainerEl.appendChild(placeholder);
 				
 				this._showList();
 			}
@@ -13250,7 +13260,7 @@
 				};
 				
 				if(this.initialValues && this.initialValues.indexOf(option.value) > -1){
-					this._chooseItem(item, true);
+					this._chooseItem(item);
 				}
 			}
 			
@@ -13395,13 +13405,14 @@
 		
 		_clearList(){
 			while(this.listEl.firstChild) this.listEl.removeChild(this.listEl.firstChild);
-			
+			while(this.listContainerEl.firstChild) this.listContainerEl.removeChild(this.listContainerEl.firstChild);
 			this.displayItems = [];
 		}
 		
 		_buildList(data){
 			this._clearList();
-			
+			this.listEl.appendChild(this.listContainerEl);
+
 			data.forEach((option) => {
 				this._buildItem(option);
 			});
@@ -13482,7 +13493,7 @@
 				
 				this._styleItem(item);
 				
-				this.listEl.appendChild(el);
+				this.listContainerEl.appendChild(el);
 				
 				if(item.group){
 					item.options.forEach((option) => {
@@ -13515,7 +13526,7 @@
 				
 				if(!startVis){
 					setTimeout(() => {
-						this.popup.hideOnBlur(this._resolveValue.bind(this, true));
+						this.popup.hideOnBlur(this._cancel.bind(this));
 					}, 10);
 				}
 			}
@@ -13551,7 +13562,16 @@
 		//////////////////////////////////////
 		
 		_cancel(){
-			this.input.value = Array.isArray(this.initialValues) ? this.initialValues[0] : this.initialValues;
+			if (this.initialValues && Array.isArray(this.initialValues)) {			
+				const sortedValues = this.initialValues.sort((a, b) => {
+					const indexA = this.data.findIndex(item => item.value === a);
+					const indexB = this.data.findIndex(item => item.value === b);
+					return indexA - indexB;
+				});
+				this.input.value = sortedValues.join(",");
+			} else {
+				this.input.value = this.initialValues || '';
+			}
 			if(this.isFilter){
 				this.currentItems = [];
 			}
@@ -13572,7 +13592,7 @@
 			this.focusedItem = null;
 		}
 		
-		_chooseItem(item, silent){
+		_chooseItem(item){
 			var index;
 			
 			this.typing = false;
@@ -13588,7 +13608,12 @@
 				this.currentItems = isSelected ? [] : [item];	
 			}
 			item.selected = !isSelected;
-			this.input.value = this.currentItems.map(item => item.label).join(",");
+			const sortedValues = this.currentItems.sort((a, b) => {
+				const indexA = this.data.findIndex(item => item.value === a.value);
+				const indexB = this.data.findIndex(item => item.value === b.value);
+				return indexA - indexB;
+			});
+			this.input.value = sortedValues.map(item => item.label).join(",");
 			this._styleItem(item);
 			this._focusItem(item);
 		}

@@ -1404,7 +1404,6 @@
   font-size: 14px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  /* Add specific styles for the done and cancel buttons */
 }
 
 .tabulator-edit-list .tabulator-edit-list-item {
@@ -1468,12 +1467,15 @@
   padding-left: 36px;
 }
 
-.tabulator-edit-list .tabulator-edit-list-done {
+
+/* Add specific styles for the done and cancel buttons */
+
+.tabulator-edit-list-done {
   border: 1px solid #ccc;
   background-color: #f0f8ff;
-    /* Light blue for success */
+  /* Light blue for success */
   height: 25px;
-    /* Match the height of list items */
+  /* Match the height of list items */
   padding: 0 10px;
   font-size: 14px;
   cursor: pointer;
@@ -1481,20 +1483,20 @@
   border-radius: 4px;
 }
 
-.tabulator-edit-list .tabulator-edit-list-done:hover {
+.tabulator-edit-list-done:hover {
   background-color: #e0f0ff;
-    /* Slightly darker blue on hover */
+  /* Slightly darker blue on hover */
 }
 
-.tabulator-edit-list .tabulator-edit-list-done:active {
+.tabulator-edit-list-done:active {
   background-color: #d0e8ff;
-    /* Even darker blue on active */
+  /* Even darker blue on active */
 }
 
-.tabulator-edit-list .tabulator-edit-list-cancel {
+.tabulator-edit-list-cancel {
   border: 1px solid #ccc;
   height: 25px;
-    /* Match the height of list items */
+  /* Match the height of list items */
   padding: 0 10px;
   font-size: 14px;
   cursor: pointer;
@@ -1502,14 +1504,14 @@
   border-radius: 4px;
 }
 
-.tabulator-edit-list .tabulator-edit-list-cancel:hover {
+.tabulator-edit-list-cancel:hover {
   background-color: #f0e0e0;
-    /* Slightly darker red on hover */
+  /* Slightly darker red on hover */
 }
 
-.tabulator-edit-list .tabulator-edit-list-cancel:active {
+.tabulator-edit-list-cancel:active {
   background-color: #e8d0d0;
-    /* Even darker red on active */
+  /* Even darker red on active */
 }
 
 .tabulator.tabulator-ltr {
