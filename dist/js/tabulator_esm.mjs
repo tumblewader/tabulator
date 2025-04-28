@@ -7246,11 +7246,18 @@ let Edit$1 = class Edit{
 	
 	_cancel(){
 		if (this.initialValues && Array.isArray(this.initialValues)) {			
-			const sortedValues = this.initialValues.sort((a, b) => {
-				const indexA = this.data.findIndex(item => item.value === a);
-				const indexB = this.data.findIndex(item => item.value === b);
-				return indexA - indexB;
-			});
+			let sortedValues = [];
+			let initialValues = JSON.parse(JSON.stringify(this.initialValues));			
+			for (const item of this.data) {
+				const index = initialValues.indexOf(item.value);
+				if (index > -1) {
+					initialValues.splice(index, 1);
+					sortedValues.push(item.label);
+					if (initialValues.length === 0) {
+						break;
+					}
+				}
+			}
 			this.input.value = sortedValues.join(",");
 		} else {
 			this.input.value = this.initialValues || '';
