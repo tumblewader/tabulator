@@ -13,13 +13,13 @@ export default class Edit{
 		this.currentItems = [];
 		this.focusedItem = null;
 		
+		this.isFilter = cell.getType() === "header";
+
 		this.input = this._createInputElement();
 		this.listEl = this._createListElement();
 		this.listContainerEl = this._createListContainerElement();
 		
 		this.initialValues = null; 
-		
-		this.isFilter = cell.getType() === "header";
 		
 		this.filterTimeout = null;
 		this.filtered = false;
@@ -74,7 +74,8 @@ export default class Edit{
 		this.initialValues = this.params.multiselect ? initialValue : [initialValue];
 		
 		if(this.isFilter){
-			this.input.value = this.initialValues ? this.initialValues.join(",") : "";
+			this.inputElement.value = this.initialValues ? this.initialValues.join(",") : "";
+			this._updateClearButtonVisibility();
 			this.headerFilterInitialListGen();            
 		}
 	}
@@ -87,8 +88,8 @@ export default class Edit{
 		}	
 		
 		if(!this.isFilter){
-			this.input.style.height = "100%";
-			this.input.focus({preventScroll: true});
+			this.inputElement.style.height = "100%";
+			this.inputElement.focus({preventScroll: true});
 		}
 		
 		
@@ -98,7 +99,7 @@ export default class Edit{
 			cellEl.removeEventListener("click", clickStop);
 		}, 1000);
 		
-		this.input.addEventListener("mousedown", this._preventPopupBlur.bind(this));
+		this.inputElement.addEventListener("mousedown", this._preventPopupBlur.bind(this));
 	}
 	
 	_createListElement(){
@@ -145,6 +146,9 @@ export default class Edit{
 		
 		input.style.padding = "4px";
 		input.style.width = "100%";
+		input.style.textOverflow = "ellipsis";
+		input.style.overflow = "hidden";
+		input.style.whiteSpace = "nowrap";
 		input.style.boxSizing = "border-box";
 		
 		if(!this.params.autocomplete){
@@ -169,8 +173,40 @@ export default class Edit{
 		}
 		
 		this._bindInputEvents(input);
+		var container = document.createElement("div");
+		container.style.position = "relative";
+		container.appendChild(input);
 
-		return input;
+		if (this.isFilter) {
+			input.style.paddingRight = "25px";
+		
+			// Add clear button
+			var clearButton = document.createElement("button");
+			var clearIcon = document.createElement("i");
+			clearIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>`;
+			clearIcon.style.display = "flex";
+			clearIcon.style.alignItems = "center";
+			clearIcon.style.justifyContent = "center";
+			clearButton.appendChild(clearIcon);
+			clearButton.style.height = "100%";
+			clearButton.style.background = "none";
+			clearButton.style.border = "none";
+			clearButton.style.outline = "none";
+			clearButton.style.color = "inherit";
+			clearButton.style.position = "absolute";
+			clearButton.style.right = "5px";
+			clearButton.style.cursor = "pointer";
+			clearButton.style.display = "none"; // Initially hidden
+			clearButton.classList.add("tabulator-edit-list-clear"); // Add class for styling
+			clearButton.addEventListener("click", this._clearButtonClick.bind(this));
+			this.clearButton = clearButton;
+			container.appendChild(clearButton);
+		}
+
+		// Store reference to the input element
+		this.inputElement = input;
+
+		return container;
 	}
 	
 	_initializeParams(params){
@@ -257,7 +293,12 @@ export default class Edit{
 	_inputFocus(e){
 		this.rebuildOptionsList();
 	}
-	
+	_clearButtonClick(e){
+		e.stopPropagation();
+		this._clearChoices();
+		this.inputElement.value = "";
+		this._resolveValue(false);	
+	}
 	_filter(){
 		if(this.params.filterRemote){
 			clearTimeout(this.filterTimeout);
@@ -523,10 +564,10 @@ export default class Edit{
 		if(this.params.values){
 			values = this.params.values;
 		}else if (this.params.valuesURL){
-			values = this._ajaxRequest(this.params.valuesURL, this.input.value);
+			values = this._ajaxRequest(this.params.valuesURL, this.inputElement.value);
 		}else{
 			if(typeof this.params.valuesLookup === "function"){
-				values = this.params.valuesLookup(this.cell, this.input.value);
+				values = this.params.valuesLookup(this.cell, this.inputElement.value);
 			}else if(this.params.valuesLookup){
 				values = this._uniqueColumnValues(this.params.valuesLookupField);
 			}
@@ -660,7 +701,8 @@ export default class Edit{
 		});
 		
 		if(!this.currentItems.length && this.params.freetext){
-			this.input.value = this.initialValues;
+			this.inputElement.value = this.initialValues;
+			this._updateClearButtonVisibility();
 			this.typing = true;
 			this.lastAction = "typing";
 		}
@@ -783,7 +825,7 @@ export default class Edit{
 	
 	_filterOptions(){
 		var filterFunc = this.params.filterFunc || this._defaultFilterFunc,
-		term = this.input.value;
+		term = this.inputElement.value;
 		
 		if(term){
 			this.filtered = true;
@@ -902,7 +944,7 @@ export default class Edit{
 					for (let key in item.elementAttributes){
 						if(key.charAt(0) == "+"){
 							key = key.slice(1);
-							el.setAttribute(key, this.input.getAttribute(key) + item.elementAttributes["+" + key]);
+							el.setAttribute(key, this.inputElement.getAttribute(key) + item.elementAttributes["+" + key]);
 						}else{
 							el.setAttribute(key, item.elementAttributes[key]);
 						}
@@ -938,7 +980,7 @@ export default class Edit{
 		var startVis = this.popup && this.popup.isVisible();
 		
 		if(this.input.parentNode){
-			if(this.params.autocomplete && this.input.value === "" && !this.params.listOnEmpty){
+			if(this.params.autocomplete && this.inputElement.value === "" && !this.params.listOnEmpty){
 				if(this.popup){
 					this.popup.hide(true);
 				}
@@ -1004,15 +1046,16 @@ export default class Edit{
 					}
 				}
 			}
-			this.input.value = sortedValues.join(",");
+			this.inputElement.value = sortedValues.join(",");
 		} else {
-			this.input.value = this.initialValues || '';
+			this.inputElement.value = this.initialValues || '';
 		}
 		if(this.isFilter){
 			this.currentItems = [];
 		}
 		this.popup.hide(true);
 		this.actions.cancel();
+		this._updateClearButtonVisibility();
 	}
 	
 	_clearChoices(){
@@ -1049,7 +1092,8 @@ export default class Edit{
 			const indexB = this.data.findIndex(item => item.value === b.value);
 			return indexA - indexB;
 		});
-		this.input.value = sortedValues.map(item => item.label).join(",");
+		this.inputElement.value = sortedValues.map(item => item.label).join(",");
+		this._updateClearButtonVisibility();
 		this._styleItem(item);
 		this._focusItem(item);
 	}
@@ -1065,8 +1109,8 @@ export default class Edit{
 			output = this.currentItems.map(item => item.value);
 		}else{
 			if(blur && this.params.autocomplete && this.typing){
-				if(this.params.freetext || (this.params.allowEmpty && this.input.value === "")){
-					output = this.input.value;
+				if(this.params.freetext || (this.params.allowEmpty && this.inputElement.value === "")){
+					output = this.inputElement.value;
 				}else{
 					this.actions.cancel();
 					return;
@@ -1092,11 +1136,15 @@ export default class Edit{
 		}
 		
 		this.actions.success(output);
-		
+		this._updateClearButtonVisibility();
 		if(this.isFilter){
 			this.initialValues = output && !Array.isArray(output) ? [output] : output;
 			this.currentItems = [];
 		}
 	}
-	
+	_updateClearButtonVisibility(){
+		if(this.isFilter) {
+			this.clearButton.style.display = this.inputElement.value ? "" : "none";
+		}
+	}
 }
