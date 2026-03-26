@@ -132,56 +132,64 @@ export default class ResizeColumns extends Module{
 		mode = column.definition.resizable,
 		config = {},
 		nearestColumn = column.getLastColumn();
-		
+
 		//set column resize mode
 		if(type === "header"){
 			variableHeight = column.definition.formatter == "textarea" || column.definition.variableHeight;
 			config = {variableHeight:variableHeight};
 		}
-		
+
 		if((mode === true || mode == type) && this._checkResizability(nearestColumn)){
-			
+
 			var handle = document.createElement('span');
 			handle.className = "tabulator-col-resize-handle";
-			
-			handle.addEventListener("click", function(e){
+
+			var handleClick = function(e){
 				e.stopPropagation();
-			});
-			
+			};
+
 			var handleDown = function(e){
 				self.startColumn = column;
 				self.initialNextColumn = self.nextColumn = nearestColumn.nextColumn();
 				self._mouseDown(e, nearestColumn, handle);
 			};
-			
-			handle.addEventListener("mousedown", handleDown);
-			handle.addEventListener("touchstart", handleDown, {passive: true});
-			
-			//resize column on  double click
-			handle.addEventListener("dblclick", (e) => {
+
+			var handleDblClick = function(e){
 				var oldWidth = nearestColumn.getWidth();
-				
+
 				e.stopPropagation();
 				nearestColumn.reinitializeWidth(true);
-				
+
 				if(oldWidth !== nearestColumn.getWidth()){
 					self.dispatch("column-resized", nearestColumn);
 					self.dispatchExternal("columnResized", nearestColumn.getComponent());
 				}
-			});
-			
+			};
+
+			handle.addEventListener("click", handleClick);
+			handle.addEventListener("mousedown", handleDown);
+			handle.addEventListener("touchstart", handleDown, {passive: true});
+			handle.addEventListener("dblclick", handleDblClick);
+
 			if(column.modules.frozen){
 				handle.style.position = "sticky";
 				handle.style[column.modules.frozen.position] = this.frozenColumnOffset(column);
 			}
-			
+
+			// Store references for cleanup in deInitializeComponent
 			config.handleEl = handle;
-			
+			config.listeners = {
+				click: handleClick,
+				mousedown: handleDown,
+				touchstart: handleDown,
+				dblclick: handleDblClick,
+			};
+
 			if(element.parentNode && column.visible){
-				element.after(handle);			
+				element.after(handle);
 			}
 		}
-		
+
 		component.modules.resize = config;
 	}
 	
@@ -194,14 +202,26 @@ export default class ResizeColumns extends Module{
 	}
 	
 	deInitializeComponent(component){
-		var handleEl;
-		
+		var handleEl, listeners;
+
 		if(component.modules.resize){
 			handleEl = component.modules.resize.handleEl;
-			
+			listeners = component.modules.resize.listeners;
+
+			// Remove event listeners before detaching from DOM to prevent memory leaks
+			if(handleEl && listeners){
+				handleEl.removeEventListener("click", listeners.click);
+				handleEl.removeEventListener("mousedown", listeners.mousedown);
+				handleEl.removeEventListener("touchstart", listeners.touchstart);
+				handleEl.removeEventListener("dblclick", listeners.dblclick);
+			}
+
 			if(handleEl && handleEl.parentElement){
 				handleEl.parentElement.removeChild(handleEl);
 			}
+
+			component.modules.resize.handleEl = null;
+			component.modules.resize.listeners = null;
 		}
 	}
 	
