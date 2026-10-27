@@ -1053,7 +1053,9 @@ export default class Edit{
 		if(this.isFilter){
 			this.currentItems = [];
 		}
-		this.popup.hide(true);
+		if(this.popup){
+			this.popup.hide(true);
+		}
 		this.actions.cancel();
 		this._updateClearButtonVisibility();
 	}

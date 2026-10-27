@@ -61,6 +61,7 @@ export default class Edit extends Module{
 	initialize(){
 		this.subscribe("cell-init", this.bindEditor.bind(this));
 		this.subscribe("cell-delete", this.clearEdited.bind(this));
+		this.subscribe("cell-delete", this.cellDeleteCheck.bind(this));
 		this.subscribe("cell-value-changed", this.updateCellClass.bind(this));
 		this.subscribe("column-layout", this.initializeColumnCheck.bind(this));
 		this.subscribe("column-delete", this.columnDeleteCheck.bind(this));
@@ -377,6 +378,13 @@ export default class Edit extends Module{
 	
 	rowDeleteCheck(row){
 		if(this.currentCell && this.currentCell.row === row){
+			this.cancelEdit();
+		}
+	}
+
+	//row.reformat() and other row re-initializations delete and recreate cells, including one being edited
+	cellDeleteCheck(cell){
+		if(this.currentCell === cell){
 			this.cancelEdit();
 		}
 	}

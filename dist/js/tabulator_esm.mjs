@@ -7307,7 +7307,9 @@ let Edit$1 = class Edit{
 		if(this.isFilter){
 			this.currentItems = [];
 		}
-		this.popup.hide(true);
+		if(this.popup){
+			this.popup.hide(true);
+		}
 		this.actions.cancel();
 		this._updateClearButtonVisibility();
 	}
@@ -7891,6 +7893,7 @@ class Edit extends Module{
 	initialize(){
 		this.subscribe("cell-init", this.bindEditor.bind(this));
 		this.subscribe("cell-delete", this.clearEdited.bind(this));
+		this.subscribe("cell-delete", this.cellDeleteCheck.bind(this));
 		this.subscribe("cell-value-changed", this.updateCellClass.bind(this));
 		this.subscribe("column-layout", this.initializeColumnCheck.bind(this));
 		this.subscribe("column-delete", this.columnDeleteCheck.bind(this));
@@ -8207,6 +8210,13 @@ class Edit extends Module{
 	
 	rowDeleteCheck(row){
 		if(this.currentCell && this.currentCell.row === row){
+			this.cancelEdit();
+		}
+	}
+
+	//row.reformat() and other row re-initializations delete and recreate cells, including one being edited
+	cellDeleteCheck(cell){
+		if(this.currentCell === cell){
 			this.cancelEdit();
 		}
 	}
@@ -15463,12 +15473,15 @@ class MoveRows extends Module{
 		if(!e || e.which === 1 || this.touchMove){
 			this._unbindMouseMove();
 
-			if(!this.connection){
+			//a redraw during the move clears the table element, detaching the placeholder and hover element
+			if(!this.connection && this.placeholderElement.parentNode){
 				this.placeholderElement.parentNode.insertBefore(this.moving.getElement(), this.placeholderElement.nextSibling);
 				this.placeholderElement.parentNode.removeChild(this.placeholderElement);
 			}
 
-			this.hoverElement.parentNode.removeChild(this.hoverElement);
+			if(this.hoverElement.parentNode){
+				this.hoverElement.parentNode.removeChild(this.hoverElement);
+			}
 
 			this.table.element.classList.remove("tabulator-block-select");
 

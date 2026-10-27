@@ -354,12 +354,15 @@ export default class MoveRows extends Module{
 		if(!e || e.which === 1 || this.touchMove){
 			this._unbindMouseMove();
 
-			if(!this.connection){
+			//a redraw during the move clears the table element, detaching the placeholder and hover element
+			if(!this.connection && this.placeholderElement.parentNode){
 				this.placeholderElement.parentNode.insertBefore(this.moving.getElement(), this.placeholderElement.nextSibling);
 				this.placeholderElement.parentNode.removeChild(this.placeholderElement);
 			}
 
-			this.hoverElement.parentNode.removeChild(this.hoverElement);
+			if(this.hoverElement.parentNode){
+				this.hoverElement.parentNode.removeChild(this.hoverElement);
+			}
 
 			this.table.element.classList.remove("tabulator-block-select");
 
