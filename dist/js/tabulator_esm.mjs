@@ -15473,10 +15473,14 @@ class MoveRows extends Module{
 		if(!e || e.which === 1 || this.touchMove){
 			this._unbindMouseMove();
 
-			//a redraw during the move clears the table element, detaching the placeholder and hover element
-			if(!this.connection && this.placeholderElement.parentNode){
-				this.placeholderElement.parentNode.insertBefore(this.moving.getElement(), this.placeholderElement.nextSibling);
-				this.placeholderElement.parentNode.removeChild(this.placeholderElement);
+			if(!this.connection){
+				if(this.placeholderElement.parentNode){
+					this.placeholderElement.parentNode.insertBefore(this.moving.getElement(), this.placeholderElement.nextSibling);
+					this.placeholderElement.parentNode.removeChild(this.placeholderElement);
+				}else {
+					//a redraw during the move cleared the table element, so the drop position is gone: cancel the move
+					this.toRow = false;
+				}
 			}
 
 			if(this.hoverElement.parentNode){
